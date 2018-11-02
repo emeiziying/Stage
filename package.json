@@ -1,0 +1,22 @@
+{
+  "name": "Stage.js",
+  "version": "0.0.1",
+  "description": "",
+  "main": "Stage.js",
+  "scripts": {
+    "compress": "uglifyjs Stage.js -o Stage.min.js -c -m"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emeiziying/Stage.js.git"
+  },
+  "author": "emeiziying",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/emeiziying/Stage.js/issues"
+  },
+  "homepage": "https://github.com/emeiziying/Stage.js#readme",
+  "dependencies": {
+    "uglify-js": "^3.0.28"
+  }
+}

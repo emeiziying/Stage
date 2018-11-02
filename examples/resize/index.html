@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+    <title>Title</title>
+
+
+    <style>
+
+        * {
+            padding: 0;
+            border: 0;
+            margin: 0;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        #test1 {
+            position: absolute;
+            width: 750px;
+            height: 1240px;
+            left: 0;
+            top: 0;
+            background-color: black;
+        }
+
+        #test2 {
+            position: absolute;
+            width: 640px;
+            height: 1240px;
+            left: 55px;
+            top: 0;
+            background-color: aquamarine;
+        }
+
+        #test3 {
+            position: absolute;
+            width: 600px;
+            height: 1030px;
+            left: 75px;
+            top: 105px;
+            background-color: white;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div id="root">
+    <div id="test1"></div>
+    <div id="test2"></div>
+    <div id="test3"></div>
+</div>
+
+<script src="../../Stage.js"></script>
+
+<script>
+    var stage = new Stage('root', {
+        width: 640,
+        height: 1240,
+        designWidth: 750,
+        designHeight: 1240,
+        safeWidth: 600,
+        safeHeight: 1030
+    })
+</script>
+
+</body>
+</html>
