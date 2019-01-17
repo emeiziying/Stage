@@ -4,7 +4,8 @@
   "description": "",
   "main": "Stage.js",
   "scripts": {
-    "compress": "uglifyjs Stage.js -o Stage.min.js -c -m"
+    "compress": "uglifyjs Stage.js -o Stage.min.js -c -m",
+    "start": "gulp default"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,8 @@
   },
   "homepage": "https://github.com/emeiziying/Stage.js#readme",
   "dependencies": {
+    "browser-sync": "^2.26.3",
+    "gulp": "^3.9.1",
     "uglify-js": "^3.0.28"
   }
 }

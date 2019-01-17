@@ -8,6 +8,12 @@ var ResolutionPolicy = {
     NO_BORDER: 3
 };
 
+var OrientationPolicy = {
+    LANDSCAPE: 1,
+    PORTRAIT: 2,
+    AUTO: 3
+};
+
 var Stage = function (id, option) {
     this.id = id || 'root';
     this.option = option || {};
@@ -20,7 +26,8 @@ var Stage = function (id, option) {
     this.safeHeight = this.option.safeHeight || this.height;
     this.zIndex = this.option.zIndex || 1;
 
-    this.resolutionPolicy = this.option.resolutionPolicy || ResolutionPolicy.NO_BORDER;
+    this.orientationPolicy = this.option.orientation || OrientationPolicy.AUTO;
+    this.resolutionPolicy = this.option.resolution || ResolutionPolicy.NO_BORDER;
 
     this.elementParent = this.option.parent || document.body;
 
@@ -31,6 +38,7 @@ var Stage = function (id, option) {
 
     this.w = this.width;
     this.h = this.height;
+    this.s = 1;
 
     this.canResize = true;
 
@@ -68,8 +76,8 @@ Stage.prototype = {
         style.position = 'absolute';
         // style.width = this.width + 'px';
         // style.height = this.height + 'px';
-        style.top = 0;
-        style.left = 0;
+        style.top = '0';
+        style.left = '0';
         style.zIndex = this.zIndex
     },
 
@@ -83,21 +91,19 @@ Stage.prototype = {
         var w = window.innerWidth;
         var h = window.innerHeight;
 
-        // console.log('delay : ' + w + ' , ' + h);
-
         var style = this.element.style;
 
         var isWider = w / h > (w > h ? this.height / this.width : this.width / this.height);
         var isWidth = true;
 
         var policy_landscape = ResolutionPolicy.FIXED_WIDTH;
-        var policy_portraint = ResolutionPolicy.FIXED_HEIGHT;
+        var policy_portrait = ResolutionPolicy.FIXED_HEIGHT;
 
         if (this.resolutionPolicy instanceof Array) {
-            policy_portraint = this.resolutionPolicy[0];
+            policy_portrait = this.resolutionPolicy[0];
             policy_landscape = this.resolutionPolicy[1];
         } else {
-            policy_portraint = this.resolutionPolicy;
+            policy_portrait = this.resolutionPolicy;
             policy_landscape = this.resolutionPolicy;
         }
 
@@ -119,20 +125,29 @@ Stage.prototype = {
 
             if (isWidth) {
                 // 横屏100%宽适配
-                var ratio = w / this.height;
+                this.s = w / this.height;
                 this.w = this.height;
-                this.h = h / ratio;
-                transform = "rotate(90deg) translate(" + ((-this.width * ratio + h) / 2) + "px," + (-w) + "px) scale(" + ratio + ")";
+                this.h = h / this.s;
+                if (this.h < this.safeWidth) {
+                    this.s = h / this.safeWidth;
+                    this.h = this.safeWidth;
+                    this.w = w / this.s;
+                }
             } else {
                 // 横屏100%高适配
-                var ratio = h / this.width;
+                this.s = h / this.width;
                 this.h = this.width;
-                this.w = w / ratio;
-                transform = "rotate(90deg) translate(0px," + (-w - this.height * ratio) / 2 + "px) scale(" + ratio + ")";
+                this.w = w / this.s;
+                if (this.w < this.safeHeight) {
+                    this.s = w / this.safeHeight;
+                    this.w = this.safeHeight;
+                    this.h = h / this.s;
+                }
             }
 
+            transform = "rotate(-90deg) translate(" + (-(this.h + this.designWidth) * this.s / 2) + "px," + (this.w - this.designHeight) * this.s / 2 + "px) scale(" + this.s + ")";
         } else {
-            switch (policy_portraint) {
+            switch (policy_portrait) {
                 case ResolutionPolicy.FIXED_WIDTH:
                     isWidth = true;
                     break;
@@ -147,32 +162,27 @@ Stage.prototype = {
 
             if (isWidth) {
                 //竖屏100%宽适配
-                var ratio = w / this.width;
+                this.s = w / this.width;
                 this.w = this.width;
-                this.h = h / ratio;
-
+                this.h = h / this.s;
                 if (this.h < this.safeHeight) {
-                    ratio = h / this.safeHeight;
+                    this.s = h / this.safeHeight;
                     this.h = this.safeHeight;
-                    this.w = w / ratio;
-                    transform = "translate(" + (w - this.designWidth * ratio) / 2 + "px," + -(this.designHeight - this.safeHeight) * ratio / 2 + "px) scale(" + ratio + ")";
-                } else {
-                    transform = "translate(" + -(this.designWidth - this.width) * ratio / 2 + "px," + (h - this.height * ratio) / 2 + "px) scale(" + ratio + ")";
+                    this.w = w / this.s;
                 }
             } else {
                 //竖屏100%高适配
-                var ratio = h / this.height;
+                this.s = h / this.height;
                 this.h = this.height;
-                this.w = w / ratio;
+                this.w = w / this.s;
                 if (this.w < this.safeWidth) {
-                    ratio = w / this.safeWidth;
+                    this.s = w / this.safeWidth;
                     this.w = this.safeWidth;
-                    this.h = h / ratio;
-                    transform = "translate(" + -(this.designWidth - this.safeWidth) * ratio / 2 + "px," + (h - this.height * ratio) / 2 + "px) scale(" + ratio + ")";
-                } else {
-                    transform = "translate(" + (w - this.designWidth * ratio) / 2 + "px,0px) scale(" + ratio + ")";
+                    this.h = h / this.s;
                 }
             }
+
+            transform = "translate(" + (this.w - this.designWidth) * this.s / 2 + "px," + (this.h - this.designHeight) * this.s / 2 + "px) scale(" + this.s + ")";
         }
 
         style.transform = transform;
@@ -189,15 +199,14 @@ Stage.prototype = {
     resize: function () {
         var self = this;
         if (this.resizeIntervalId) clearTimeout(this.resizeIntervalId);
-
         if (!this.canResize) return;
-
-        var w = window.innerWidth;
-        var h = window.innerHeight;
-
         this.resizeIntervalId = setTimeout(function () {
             self.resizeDelay();
         }, 100);
+    },
+
+    setResize: function (canResize) {
+        this.canResize = !!canResize;
     },
 
     setZ: function (index) {
