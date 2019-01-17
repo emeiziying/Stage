@@ -38,7 +38,11 @@ var Stage = function (id, option) {
 
     this.w = this.width;
     this.h = this.height;
-    this.s = 1;
+
+
+    this.x = 0;
+    this.y = 0;
+    this.scale = 1;
 
     this.canResize = true;
 
@@ -74,8 +78,8 @@ Stage.prototype = {
 
         var style = this.element.style;
         style.position = 'absolute';
-        // style.width = this.width + 'px';
-        // style.height = this.height + 'px';
+        // style.width = this.w + 'px';
+        // style.height = this.h + 'px';
         style.top = '0';
         style.left = '0';
         style.zIndex = this.zIndex
@@ -93,7 +97,7 @@ Stage.prototype = {
 
         var style = this.element.style;
 
-        var isWider = w / h > (w > h ? this.height / this.width : this.width / this.height);
+        var isWider = w / h > (w > h ? this.h / this.w : this.w / this.h);
         var isWidth = true;
 
         var policy_landscape = ResolutionPolicy.FIXED_WIDTH;
@@ -125,27 +129,30 @@ Stage.prototype = {
 
             if (isWidth) {
                 // 横屏100%宽适配
-                this.s = w / this.height;
-                this.w = this.height;
-                this.h = h / this.s;
-                if (this.h < this.safeWidth) {
-                    this.s = h / this.safeWidth;
-                    this.h = this.safeWidth;
-                    this.w = w / this.s;
+                this.scale = w / this.h;
+                this.width = this.h;
+                this.height = h / this.scale;
+                if (this.height < this.safeWidth) {
+                    this.scale = h / this.safeWidth;
+                    this.height = this.safeWidth;
+                    this.width = w / this.scale;
                 }
             } else {
                 // 横屏100%高适配
-                this.s = h / this.width;
-                this.h = this.width;
-                this.w = w / this.s;
-                if (this.w < this.safeHeight) {
-                    this.s = w / this.safeHeight;
-                    this.w = this.safeHeight;
-                    this.h = h / this.s;
+                this.scale = h / this.w;
+                this.height = this.w;
+                this.width = w / this.scale;
+                if (this.width < this.safeHeight) {
+                    this.scale = w / this.safeHeight;
+                    this.width = this.safeHeight;
+                    this.height = h / this.scale;
                 }
             }
 
-            transform = "rotate(-90deg) translate(" + (-(this.h + this.designWidth) * this.s / 2) + "px," + (this.w - this.designHeight) * this.s / 2 + "px) scale(" + this.s + ")";
+            this.x = (this.height - this.designWidth) / 2;
+            this.y = (this.width - this.designHeight) / 2;
+
+            transform = "rotate(-90deg) translate(" + (-this.height + this.x) * this.scale + "px," + this.y * this.scale + "px) scale(" + this.scale + ")";
         } else {
             switch (policy_portrait) {
                 case ResolutionPolicy.FIXED_WIDTH:
@@ -162,27 +169,30 @@ Stage.prototype = {
 
             if (isWidth) {
                 //竖屏100%宽适配
-                this.s = w / this.width;
-                this.w = this.width;
-                this.h = h / this.s;
-                if (this.h < this.safeHeight) {
-                    this.s = h / this.safeHeight;
-                    this.h = this.safeHeight;
-                    this.w = w / this.s;
+                this.scale = w / this.w;
+                this.width = this.w;
+                this.height = h / this.scale;
+                if (this.height < this.safeHeight) {
+                    this.scale = h / this.safeHeight;
+                    this.height = this.safeHeight;
+                    this.width = w / this.scale;
                 }
             } else {
                 //竖屏100%高适配
-                this.s = h / this.height;
-                this.h = this.height;
-                this.w = w / this.s;
-                if (this.w < this.safeWidth) {
-                    this.s = w / this.safeWidth;
-                    this.w = this.safeWidth;
-                    this.h = h / this.s;
+                this.scale = h / this.h;
+                this.height = this.h;
+                this.width = w / this.scale;
+                if (this.width < this.safeWidth) {
+                    this.scale = w / this.safeWidth;
+                    this.width = this.safeWidth;
+                    this.height = h / this.scale;
                 }
             }
 
-            transform = "translate(" + (this.w - this.designWidth) * this.s / 2 + "px," + (this.h - this.designHeight) * this.s / 2 + "px) scale(" + this.s + ")";
+            this.x = (this.width - this.designWidth) / 2;
+            this.y = (this.height - this.designHeight) / 2;
+
+            transform = "translate(" + this.x * this.scale + "px," + this.y * this.scale + "px) scale(" + this.scale + ")";
         }
 
         style.transform = transform;
@@ -193,6 +203,22 @@ Stage.prototype = {
         for (var i = 0; i < this.resizeCallbackArr.length; i++) {
             var callback = this.resizeCallbackArr[i];
             callback && callback();
+        }
+    },
+
+    getSize: function () {
+        return {
+            width: this.width,
+            height: this.height
+        };
+    },
+
+    getRect: function () {
+        return {
+            x: this.x,
+            y: this.y,
+            width: this.width,
+            height: this.height
         }
     },
 
